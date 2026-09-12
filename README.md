@@ -31,6 +31,7 @@ python manage.py runserver
 
 The server listens on `http://127.0.0.1:8000`.
 
+> [!CAUTION]
 > **Special note:** This project is deployed on Render for public test. After you send the API request in Postman, it can take 60 minutes to show the result. Stay online until then.
 
 ## Test both endpoints in Postman
