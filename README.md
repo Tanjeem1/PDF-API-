@@ -1,4 +1,6 @@
-# PDF Editor APIs
+# PDF-API-
+
+This project API translates PDF content from one language to another and adds a watermark on every page of a PDF.
 
 ## Setup
 
@@ -47,8 +49,6 @@ Attach any PDF of your own on the `file` field.
 
 4. Send. Expected: **200**, a downloadable `translated.pdf`.
 
-
-
 ### 2. Watermark PDF test
 
 1. New request → method **POST**.
@@ -79,8 +79,3 @@ Attach **your own PDF** on `file`. Body = **form-data**. Then download the respo
 `file` = your PDF · `text` = `CONFIDENTIAL` · `position` = `center` · `opacity` = `0.25` · `color` = `#FF0000`  
 `position` also: `top-left` `top-center` `top-right` `center` `bottom-left` `bottom-center` `bottom-right`  
 → **200** `watermarked.pdf`
-
-Full field notes: `POSTMAN.md`  
-Collection file: `postman/PDF_Editor_APIs.postman_collection.json`  
-Public Postman collection: https://www.postman.com/jesusempireofficial/workspace/pdf-editor-apis-public/collection/52999112-77e47581-6e95-4a38-a142-7010f781916d
-
