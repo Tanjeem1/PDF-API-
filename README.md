@@ -32,7 +32,7 @@ python manage.py runserver
 The server listens on `http://127.0.0.1:8000`.
 
 > [!CAUTION]
-> **Special note:** This project is deployed on Render for public test. After you send the API request in Postman, it can take 60 minutes to show the result. Stay online until then.
+> **Special note:** This project is deployed on Render for public test. After you send the API request in Postman, it can take 60 seconds to show the result. Stay online until then.
 
 ## Test both endpoints in Postman
 
@@ -41,7 +41,7 @@ Attach any PDF of your own on the `file` field.
 ### 1. Translate PDF test
 
 1. New request → method **POST**.
-2. URL: `http://127.0.0.1:8000/api/translate-pdf`
+2. URL: `https://pdf-api-zm28.onrender.com/api/translate-pdf`
 3. Body → **form-data**:
 
 | Key | Type | Value |
@@ -55,7 +55,7 @@ Attach any PDF of your own on the `file` field.
 ### 2. Watermark PDF test
 
 1. New request → method **POST**.
-2. URL: `http://127.0.0.1:8000/editor/pdf/watermark`
+2. URL: `https://pdf-api-zm28.onrender.com/editor/pdf/watermark`
 3. Body → **form-data**:
 
 | Key | Type | Value |
@@ -74,11 +74,11 @@ Attach any PDF of your own on the `file` field.
 
 Attach **your own PDF** on `file`. Body = **form-data**. Then download the response.
 
-**Translate** — `POST http://127.0.0.1:8000/api/translate-pdf`  
+**Translate** — `POST https://pdf-api-zm28.onrender.com/api/translate-pdf`  
 `file` = your PDF · `source_language` = `en` · `target_language` = `bn`  
 → **200** `translated.pdf`
 
-**Watermark** — `POST http://127.0.0.1:8000/editor/pdf/watermark`  
+**Watermark** — `POST https://pdf-api-zm28.onrender.com/editor/pdf/watermark`  
 `file` = your PDF · `text` = `CONFIDENTIAL` · `position` = `center` · `opacity` = `0.25` · `color` = `#FF0000`  
 `position` also: `top-left` `top-center` `top-right` `center` `bottom-left` `bottom-center` `bottom-right`  
 → **200** `watermarked.pdf`
