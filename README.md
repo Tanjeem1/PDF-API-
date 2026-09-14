@@ -36,11 +36,11 @@ The server listens on `http://127.0.0.1:8000`.
 
 ## Test both endpoints in Postman
 
-Use a **small 1-page text PDF** (typed text, not a scan or image-only file).
+Use a **text PDF** (typed text, not a scan or image-only file).
 
-Limits: upload up to **150 pages**. Translate accepts up to **50 pages**. On the public Render server, a 50-page translate will usually time out. For a reliable demo, use a **1-page text PDF**.
+Limits: upload up to **150 pages**. Translate accepts up to **50 pages**. Watermark can use the full 150.
 
-Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pdf`) on the public translate URL. That request can hit a **30–60 second** limit and Postman may show `500 Internal Server Error` even when the form is correct.
+On the public Render URL, a long translate can still take several minutes. If Postman shows `500`, wait and retry, or test a shorter PDF. Local `runserver` can finish longer files more reliably.
 
 **Do this the same way for both APIs:**
 
@@ -60,7 +60,7 @@ Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pd
 
 | Key | Type | Value |
 |---|---|---|
-| `file` | File | a short 1-page text PDF |
+| `file` | File | your text PDF (up to 50 pages) |
 | `source_language` | Text | `en` |
 | `target_language` | Text | `bn` |
 
@@ -91,7 +91,7 @@ Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pd
 Same rules: **POST**, no auth, **Body → form-data** only. Then download and open the PDF.
 
 **Translate** — `POST https://pdf-api-zm28.onrender.com/api/translate-pdf`  
-`file` = a short 1-page text PDF · `source_language` = `en` · `target_language` = `bn`  
+`file` = your text PDF (up to 50 pages) · `source_language` = `en` · `target_language` = `bn`  
 → **200** `translated.pdf` (Bangla text)
 
 **Watermark** — `POST https://pdf-api-zm28.onrender.com/editor/pdf/watermark`  

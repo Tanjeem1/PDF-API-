@@ -72,7 +72,7 @@ class TranslatePDFView(APIView):
                         f"This PDF has {len(pages)} pages. "
                         f"The public translate API accepts at most "
                         f"{settings.MAX_TRANSLATE_PAGES} pages. "
-                        "Use a short 1-page text PDF."
+                        "Use a PDF with 50 pages or fewer."
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST,

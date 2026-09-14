@@ -139,7 +139,7 @@ def _translate_with_google_gtx(text: str, source: str, target: str) -> str:
     src = normalize_language_code(source)
     dst = normalize_language_code(target)
     parts: list[str] = []
-    for piece in chunk_text(text, 450) or [text]:
+    for piece in chunk_text(text, 1500) or [text]:
         response = requests.get(
             "https://clients5.google.com/translate_a/t",
             params={"client": "dict-chrome-ex", "sl": src, "tl": dst, "q": piece},
