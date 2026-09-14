@@ -2,6 +2,7 @@ import logging
 import re
 import time
 
+import requests
 from deep_translator import GoogleTranslator, MyMemoryTranslator
 from deep_translator.exceptions import LanguageNotSupportedException
 from django.conf import settings
@@ -80,25 +81,41 @@ def chunk_text(text: str, limit: int | None = None) -> list[str]:
     return chunks
 
 
+_MYMEMORY_DEFAULTS = {
+    "en": "en-GB",
+    "bn": "bn-IN",
+    "zh": "zh-CN",
+    "hi": "hi-IN",
+    "ar": "ar-SA",
+    "es": "es-ES",
+    "fr": "fr-FR",
+    "de": "de-DE",
+}
+
+
 def _mymemory_code(code: str) -> str:
     """Map ISO codes like 'en' / 'bn' to MyMemory locales (en-GB, bn-IN)."""
     global _MYMEMORY_CODES
-    if _MYMEMORY_CODES is None:
-        raw = MyMemoryTranslator(source="en-GB", target="bn-IN").get_supported_languages(as_dict=True)
-        mapped: dict[str, str] = {}
-        for locale in raw.values():
-            locale = str(locale)
-            short = locale.split("-", 1)[0].lower()
-            mapped.setdefault(short, locale)
-            mapped[locale.lower()] = locale
-        # Prefer common locales when several exist.
-        mapped["en"] = "en-GB"
-        mapped["bn"] = "bn-IN"
-        mapped["zh"] = "zh-CN"
-        _MYMEMORY_CODES = mapped
     key = code.strip().lower()
+    if _MYMEMORY_CODES is None:
+        mapped = dict(_MYMEMORY_DEFAULTS)
+        try:
+            raw = MyMemoryTranslator(source="en-GB", target="bn-IN").get_supported_languages(
+                as_dict=True
+            )
+            for locale in raw.values():
+                locale = str(locale)
+                short = locale.split("-", 1)[0].lower()
+                mapped.setdefault(short, locale)
+                mapped[locale.lower()] = locale
+            mapped.update(_MYMEMORY_DEFAULTS)
+        except Exception as exc:
+            logger.info("MyMemory language list unavailable (%s)", exc)
+        _MYMEMORY_CODES = mapped
     if key in _MYMEMORY_CODES:
         return _MYMEMORY_CODES[key]
+    if len(key) == 2:
+        return f"{key}-{key.upper()}"
     raise LanguageNotSupportedException(code)
 
 
@@ -106,8 +123,53 @@ def _is_unchanged(original: str, translated: str) -> bool:
     return (translated or "").strip().rstrip(".!?").lower() == (original or "").strip().rstrip(".!?").lower()
 
 
+def _require_changed(original: str, translated: str, backend: str) -> str:
+    if not (translated or "").strip() or _is_unchanged(original, translated):
+        raise RuntimeError(f"{backend} returned empty or original text")
+    return translated
+
+
 def _translate_with_google(text: str, source: str, target: str) -> str:
-    return GoogleTranslator(source=source, target=target).translate(text)
+    return _require_changed(
+        text, GoogleTranslator(source=source, target=target).translate(text), "GoogleTranslator"
+    )
+
+
+def _translate_with_google_gtx(text: str, source: str, target: str) -> str:
+    src = normalize_language_code(source)
+    dst = normalize_language_code(target)
+    parts: list[str] = []
+    for piece in chunk_text(text, 450) or [text]:
+        response = requests.get(
+            "https://clients5.google.com/translate_a/t",
+            params={"client": "dict-chrome-ex", "sl": src, "tl": dst, "q": piece},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=20,
+        )
+        response.raise_for_status()
+        data = response.json()
+        if isinstance(data, list) and data:
+            out = data[0][0] if isinstance(data[0], list) else data[0]
+        else:
+            out = ""
+        parts.append(_require_changed(piece, str(out or ""), "GoogleGTX"))
+    return " ".join(parts)
+
+
+def _translate_with_mymemory_http(text: str, source: str, target: str) -> str:
+    src = normalize_language_code(source)
+    dst = normalize_language_code(target)
+    parts: list[str] = []
+    for piece in chunk_text(text, 450) or [text]:
+        response = requests.get(
+            "https://api.mymemory.translated.net/get",
+            params={"q": piece, "langpair": f"{src}|{dst}"},
+            timeout=20,
+        )
+        response.raise_for_status()
+        out = ((response.json() or {}).get("responseData") or {}).get("translatedText") or ""
+        parts.append(_require_changed(piece, out, "MyMemoryHTTP"))
+    return " ".join(parts)
 
 
 def _translate_with_mymemory(text: str, source: str, target: str) -> str:
@@ -116,13 +178,10 @@ def _translate_with_mymemory(text: str, source: str, target: str) -> str:
     pieces = chunk_text(text, 450) or [text]
     translator = MyMemoryTranslator(source=src, target=dst)
     out = " ".join(translator.translate(piece) for piece in pieces)
-    if _is_unchanged(text, out):
-        raise RuntimeError("MyMemory returned the original text")
-    return out
+    return _require_changed(text, out, "MyMemory")
 
 
 def _translate_with_lingva(text: str, source: str, target: str) -> str:
-    import requests
     from requests.utils import quote
 
     src = normalize_language_code(source)
@@ -131,15 +190,15 @@ def _translate_with_lingva(text: str, source: str, target: str) -> str:
     response = requests.get(url, timeout=20)
     response.raise_for_status()
     out = (response.json() or {}).get("translation") or ""
-    if not out.strip() or _is_unchanged(text, out):
-        raise RuntimeError("Lingva returned empty or original text")
-    return out
+    return _require_changed(text, out, "Lingva")
 
 
 def _google_translate(text: str, source: str, target: str) -> str:
-    """Google, then MyMemory, then Lingva. Reject unchanged copy as a failure."""
+    """Try public backends in order. Reject unchanged copy as a failure."""
     errors: list[Exception] = []
     for name, fn in (
+        ("GoogleGTX", _translate_with_google_gtx),
+        ("MyMemoryHTTP", _translate_with_mymemory_http),
         ("GoogleTranslator", _translate_with_google),
         ("MyMemory", _translate_with_mymemory),
         ("Lingva", _translate_with_lingva),
