@@ -108,7 +108,7 @@ def apply_watermark(
                 fontname=fontname,
                 fontfile=fontfile,
                 color=rgb,
-                fill_opacity=float(opacity),
+                fill_opacity=max(float(opacity), 0.6),
                 align=align,
                 overlay=True,
             )

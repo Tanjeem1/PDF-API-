@@ -63,7 +63,7 @@ Attach any PDF of your own on the `file` field.
 | `file` | File | your PDF |
 | `text` | Text | `CONFIDENTIAL` |
 | `position` | Text | `center` |
-| `opacity` | Text | `0.25` |
+| `opacity` | Text | `0.6` |
 | `color` | Text | `#FF0000` |
 
 `position` may also be `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, or `bottom-right`.
@@ -79,6 +79,6 @@ Attach **your own PDF** on `file`. Body = **form-data**. Then download the respo
 → **200** `translated.pdf`
 
 **Watermark** — `POST https://pdf-api-zm28.onrender.com/editor/pdf/watermark`  
-`file` = your PDF · `text` = `CONFIDENTIAL` · `position` = `center` · `opacity` = `0.25` · `color` = `#FF0000`  
+`file` = your PDF · `text` = `CONFIDENTIAL` · `position` = `center` · `opacity` = `0.6` · `color` = `#FF0000`  
 `position` also: `top-left` `top-center` `top-right` `center` `bottom-left` `bottom-center` `bottom-right`  
 → **200** `watermarked.pdf`
