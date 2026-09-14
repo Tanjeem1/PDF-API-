@@ -1,6 +1,7 @@
 import logging
 from io import BytesIO
 
+from django.conf import settings
 from django.http import FileResponse
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -59,6 +60,19 @@ class TranslatePDFView(APIView):
                     "error": (
                         "No extractable text found. "
                         "Scanned or image-only PDFs are not supported."
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if len(pages) > settings.MAX_TRANSLATE_PAGES:
+            return Response(
+                {
+                    "error": (
+                        f"This PDF has {len(pages)} pages. "
+                        f"The public translate API accepts at most "
+                        f"{settings.MAX_TRANSLATE_PAGES} pages. "
+                        "Use a short 1-page text PDF."
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST,

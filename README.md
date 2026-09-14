@@ -38,6 +38,8 @@ The server listens on `http://127.0.0.1:8000`.
 
 Use a **small 1-page text PDF** (typed text, not a scan or image-only file).
 
+Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pdf`). That file is too big for the public server. The request then hits a **30–60 second** limit and Postman shows `500 Internal Server Error` even when the form is correct.
+
 **Do this the same way for both APIs:**
 
 1. Method must be **POST** (not GET).
@@ -56,7 +58,7 @@ Use a **small 1-page text PDF** (typed text, not a scan or image-only file).
 
 | Key | Type | Value |
 |---|---|---|
-| `file` | File | your PDF |
+| `file` | File | a short 1-page text PDF |
 | `source_language` | Text | `en` |
 | `target_language` | Text | `bn` |
 
@@ -87,7 +89,7 @@ Use a **small 1-page text PDF** (typed text, not a scan or image-only file).
 Same rules: **POST**, no auth, **Body → form-data** only. Then download and open the PDF.
 
 **Translate** — `POST https://pdf-api-zm28.onrender.com/api/translate-pdf`  
-`file` = your PDF · `source_language` = `en` · `target_language` = `bn`  
+`file` = a short 1-page text PDF · `source_language` = `en` · `target_language` = `bn`  
 → **200** `translated.pdf` (Bangla text)
 
 **Watermark** — `POST https://pdf-api-zm28.onrender.com/editor/pdf/watermark`  

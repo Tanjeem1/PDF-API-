@@ -246,11 +246,11 @@ def translate_pages(pages: list[list[str]], source: str, target: str) -> list[li
     dst = normalize_language_code(target)
     out: list[list[str]] = []
     for page in pages:
-        translated_page: list[str] = []
-        for block in page:
-            key = block
-            if key not in cache:
-                cache[key] = translate_text(block, src, dst)
-            translated_page.append(cache[key])
-        out.append(translated_page)
+        joined = "\n\n".join(block for block in page if block.strip())
+        if not joined:
+            out.append([])
+            continue
+        if joined not in cache:
+            cache[joined] = translate_text(joined, src, dst)
+        out.append([cache[joined]])
     return out
