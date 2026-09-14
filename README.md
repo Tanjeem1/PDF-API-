@@ -38,7 +38,9 @@ The server listens on `http://127.0.0.1:8000`.
 
 Use a **small 1-page text PDF** (typed text, not a scan or image-only file).
 
-Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pdf`). That file is too big for the public server. The request then hits a **30–60 second** limit and Postman shows `500 Internal Server Error` even when the form is correct.
+Limits: upload up to **150 pages**. Translate accepts up to **50 pages**. On the public Render server, a 50-page translate will usually time out. For a reliable demo, use a **1-page text PDF**.
+
+Do **not** use a long story or book PDF (for example `the-most-dangerous-game.pdf`) on the public translate URL. That request can hit a **30–60 second** limit and Postman may show `500 Internal Server Error` even when the form is correct.
 
 **Do this the same way for both APIs:**
 
